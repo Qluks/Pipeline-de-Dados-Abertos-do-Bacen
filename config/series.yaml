@@ -1,0 +1,20 @@
+# codigo: número da série no SGS (https://www3.bcb.gov.br/sgspub)
+# nome: identificador legível, usado nos paths e logs
+# data_inicial: início da série (formato DD/MM/AAAA)
+
+series:
+  - codigo: 11
+    nome: selic_diaria
+    data_inicial: "01/01/2015"
+
+  - codigo: 1
+    nome: cambio_usd_venda
+    data_inicial: "01/01/2015"
+
+  - codigo: 433
+    nome: ipca_mensal
+    data_inicial: "01/01/2015"
+
+  - codigo: 4390
+    nome: taxa_media_juros_credito
+    data_inicial: "01/01/2015"
