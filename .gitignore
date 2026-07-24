@@ -1,0 +1,13 @@
+# Dados locais (bronze/silver/gold) — não versionar
+data/
+
+# Ambiente virtual
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Ambiente / segredos
+.env
