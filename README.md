@@ -68,3 +68,15 @@ from src.transform.spark_session import get_spark_session
 spark = get_spark_session()
 spark.read.format("delta").load("data/gold/comparativo_mensal").show()
 ```
+
+## Etapa 3: Testes automatizados
+
+```bash
+pytest -v
+```
+
+18 testes cobrindo:
+- **Ingestão** (`test_ingestion.py`): chunking de janelas anuais, agregação de múltiplas páginas, tratamento de erro HTTP/formato inválido, gravação em bronze — tudo com a API mockada (nenhuma chamada de rede real).
+- **Transformação** (`test_transform.py`): conversão de vírgula decimal, dedup mantendo a ingestão mais recente, remoção de nulos, agregação mensal, cálculo de variação percentual, pivot do comparativo — usando uma `SparkSession` local de teste.
+
+O arquivo `pytest.ini` já configura o `pythonpath`, então basta rodar `pytest` na raiz do projeto.
