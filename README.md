@@ -124,3 +124,36 @@ O app tem:
 Pra publicar de graça: suba o repositório no GitHub e conecte em
 https://share.streamlit.io (Streamlit Community Cloud) — ele builda
 direto do `requirements.txt` e do `src/dashboard/app.py`.
+
+## Etapa 6: CI/CD (GitHub Actions)
+
+Dois workflows em `.github/workflows/`:
+
+- **`ci.yml`** — roda em todo push/PR pra `main`: lint (`ruff`) + testes
+  (`pytest`). Garante que você nunca quebra o pipeline sem perceber.
+- **`ingest.yml`** — roda todo dia às 08:00 UTC (ou manualmente, pela aba
+  *Actions* do GitHub → botão *Run workflow*): ingestão + transformação
+  completa, e commita a camada **gold** atualizada de volta no repositório.
+
+Decisão importante refletida no `.gitignore`: **bronze e silver não são
+versionados** (crescem sem limite, não fazem sentido no Git), mas a
+**gold é versionada de propósito** — ela é pequena (agregados mensais)
+e é o que o dashboard publicado no Streamlit Community Cloud vai ler.
+Como o Community Cloud reconstrói o app a cada push na branch conectada,
+isso fecha o ciclo: ingestão automática -> gold atualizada -> dashboard
+atualizado, tudo sem intervenção manual.
+
+Nenhum secret é necessário — a API do Bacen é pública, e o `ingest.yml`
+usa o `GITHUB_TOKEN` padrão (com permissão de escrita) pra commitar de volta.
+
+---
+
+## Projeto completo
+
+Todas as 6 etapas do roadmap estão implementadas:
+1. Ingestão (API do Bacen, chunking, retry)
+2. Transformação (PySpark + Delta Lake, medallion architecture)
+3. Testes automatizados (pytest)
+4. Qualidade de dados (Great Expectations)
+5. Dashboard (Streamlit + delta-rs)
+6. CI/CD (GitHub Actions)

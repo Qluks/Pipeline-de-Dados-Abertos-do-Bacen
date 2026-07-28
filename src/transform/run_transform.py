@@ -14,10 +14,13 @@ import logging
 import sys
 
 from src.quality.expectations import DataQualityError, validar_ou_falhar
-from src.transform.bronze_to_silver import SILVER_PATH_DEFAULT, executar as bronze_to_silver
+from src.transform.bronze_to_silver import SILVER_PATH_DEFAULT
+from src.transform.bronze_to_silver import executar as bronze_to_silver
 from src.transform.silver_to_gold import (
     GOLD_COMPARATIVO_PATH_DEFAULT,
     GOLD_MENSAL_PATH_DEFAULT,
+)
+from src.transform.silver_to_gold import (
     executar as silver_to_gold,
 )
 from src.transform.spark_session import get_spark_session

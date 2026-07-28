@@ -1,5 +1,10 @@
-# Dados locais (bronze/silver/gold) — não versionar
-data/
+# Dados locais brutos/intermediários — não versionar (crescem sem limite)
+data/bronze/
+data/silver/
+
+# A camada gold É versionada de propósito: é pequena (agregados mensais),
+# e o GitHub Actions precisa dela commitada pro dashboard publicado
+# (Streamlit Community Cloud) sempre mostrar o dado mais recente.
 
 # Ambiente virtual
 .venv/
