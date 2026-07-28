@@ -1,3 +1,11 @@
+"""
+Ingestão de séries temporais do SGS/Bacen.
+
+Camada bronze: salva o payload bruto retornado pela API, sem nenhuma
+transformação, particionado por série e data de ingestão. Isso garante
+um dado imutável e auditável para reprocessamento futuro.
+"""
+
 from __future__ import annotations
 
 import json
@@ -18,6 +26,10 @@ logger = logging.getLogger(__name__)
 
 BASE_URL = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.{codigo}/dados"
 
+# A API do SGS não documenta um limite oficial de linhas por request,
+# mas na prática requests com janelas muito longas (décadas) podem
+# falhar ou demorar demais. Quebrar por ano é uma forma simples e
+# segura de evitar esse problema, independente da série.
 CHUNK_BY_YEARS = 1
 
 

@@ -1,0 +1,51 @@
+name: Ingestão diária
+
+on:
+  schedule:
+    # 08:00 UTC = 05:00 no horário de Brasília — ajuste se quiser outro horário
+    - cron: "0 8 * * *"
+  workflow_dispatch: {}  # permite rodar manualmente pela aba Actions do GitHub
+
+permissions:
+  contents: write  # necessário pra commitar a gold atualizada de volta no repo
+
+jobs:
+  ingest-and-transform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Configurar Java (necessário pro PySpark)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Rodar ingestão (bronze)
+        run: python -m src.ingestion.run_ingestion
+
+      - name: Rodar transformação (silver -> validação -> gold)
+        run: python -m src.transform.run_transform
+
+      - name: Commitar a camada gold atualizada
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/gold
+          if git diff --cached --quiet; then
+            echo "Nenhuma mudança na gold hoje — nada pra commitar."
+          else
+            git commit -m "Atualiza dados gold ($(date -u +'%Y-%m-%d'))"
+            git push
+          fi
