@@ -80,3 +80,47 @@ pytest -v
 - **Transformação** (`test_transform.py`): conversão de vírgula decimal, dedup mantendo a ingestão mais recente, remoção de nulos, agregação mensal, cálculo de variação percentual, pivot do comparativo — usando uma `SparkSession` local de teste.
 
 O arquivo `pytest.ini` já configura o `pythonpath`, então basta rodar `pytest` na raiz do projeto.
+
+## Etapa 4: Qualidade de dados (Great Expectations)
+
+A validação roda automaticamente como parte de `python -m src.transform.run_transform`,
+entre a etapa silver e a gold — se falhar, o pipeline para e a gold **não** é gerada.
+
+Checagens aplicadas na camada silver:
+- `data` e `valor` nunca nulos
+- Sem duplicata de (série, data)
+- `valor` dentro de um range **específico por série** (ex: SELIC entre 0-100,
+  IPCA mensal entre -5 e 5) — configurável em `src/quality/expectations.py`,
+  dicionário `RANGES_POR_SERIE`
+
+Pra rodar sem a validação (debug pontual, não recomendado):
+```bash
+python -m src.transform.run_transform --skip-quality-check
+```
+
+Testes: `pytest tests/test_quality.py -v`
+
+## Etapa 5: Dashboard (Streamlit)
+
+```bash
+streamlit run src/dashboard/app.py
+```
+
+Decisão técnica importante: o dashboard lê as tabelas gold com
+**`deltalake` (delta-rs)**, não com PySpark. O pipeline de transformação
+precisa do Spark pra processar/agregar os dados, mas o dashboard só
+precisa *ler* duas tabelas pequenas já prontas — subir uma JVM inteira
+via Spark só pra isso adicionaria segundos de latência a cada acesso,
+sem necessidade. `deltalake` lê o mesmo formato aberto do Delta Lake,
+sem precisar de Java.
+
+O app tem:
+- Filtro de séries e intervalo de datas (sidebar)
+- KPIs com o valor mais recente + variação % de cada série selecionada
+- Gráfico de série temporal (uma linha por indicador)
+- Comparativo entre indicadores no mesmo período
+- Tabela detalhada (expansível)
+
+Pra publicar de graça: suba o repositório no GitHub e conecte em
+https://share.streamlit.io (Streamlit Community Cloud) — ele builda
+direto do `requirements.txt` e do `src/dashboard/app.py`.
